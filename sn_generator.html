@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SN Search Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --border2: #3a3a3a;
+    --text: #e8e8e0;
+    --text2: #888880;
+    --text3: #555550;
+    --accent: #c8f060;
+    --accent2: #60c8f0;
+    --accent3: #f0a060;
+    --danger: #f06060;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+
+  .logo span { color: var(--text2); }
+
+  .step-bar {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .step-bar .s { padding: 3px 8px; border-radius: 3px; transition: all 0.2s; }
+  .step-bar .s.active { background: var(--accent); color: #0f0f0f; font-weight: 500; }
+  .step-bar .s.done { color: var(--accent); }
+  .step-bar .sep { color: var(--border2); }
+
+  main { flex: 1; display: flex; }
+
+  /* STEP 1: INPUT */
+  #step1 { width: 100%; display: flex; flex-direction: column; }
+
+  .input-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  h1 em { color: var(--accent); font-style: normal; }
+
+  .desc {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 28px;
+    line-height: 1.6;
+    font-family: var(--mono);
+  }
+
+  textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: vertical;
+    min-height: 280px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text3); }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 28px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.04em;
+  }
+
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 12px 20px;
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+  .loading-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 60px;
+    flex: 1;
+  }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  /* STEP 2: RESULT */
+  #step2 { display: none; width: 100%; flex-direction: column; }
+
+  .result-header {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    border-radius: 5px;
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover { border-color: var(--text2); color: var(--text); }
+
+  .result-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .result-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+
+  .group-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .group-head {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .group-letter {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    background: rgba(200,240,96,0.1);
+    padding: 2px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .group-name { font-size: 14px; font-weight: 600; }
+
+  .group-companies {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .group-body { padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+
+  .fields { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+  .field-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .field-value {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    line-height: 1.7;
+    word-break: break-all;
+    user-select: all;
+    cursor: text;
+  }
+
+  .field-value.kw { color: var(--accent2); font-weight: 500; }
+
+  .actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 6px 12px;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .copy-btn:hover { border-color: var(--text2); color: var(--text); }
+  .copy-btn.ok { border-color: var(--accent); color: var(--accent); }
+
+  .open-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 6px 12px;
+    border: 1px solid rgba(96,200,240,0.4);
+    border-radius: 5px;
+    background: transparent;
+    color: var(--accent2);
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.15s;
+    display: block;
+  }
+
+  .open-btn:hover { background: rgba(96,200,240,0.08); }
+
+  .error-box {
+    background: rgba(240,96,96,0.08);
+    border: 1px solid rgba(240,96,96,0.3);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 12px;
+    display: none;
+  }
+
+  .hint {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 10px;
+    line-height: 1.6;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-radius: 6px;
+    border-left: 2px solid var(--accent);
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+
+  .tag-strict { background: rgba(200,240,96,0.12); color: var(--accent); }
+  .tag-mid { background: rgba(96,200,240,0.12); color: var(--accent2); }
+  .tag-loose { background: rgba(240,160,96,0.12); color: var(--accent3); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SN<span>/</span>SEARCH<span>_</span>GEN</div>
+  <div class="step-bar">
+    <span class="s active" id="s1">01 入力</span>
+    <span class="sep">›</span>
+    <span class="s" id="s2">02 生成</span>
+  </div>
+</header>
+
+<main>
+  <!-- STEP 1 -->
+  <div id="step1" style="display:flex; flex-direction:column; width:100%;">
+    <div class="input-area">
+      <div class="section-label">SALES NAVIGATOR SEARCH GENERATOR</div>
+      <h1>案件情報を貼って<br><em>検索条件を自動生成</em></h1>
+      <div class="desc">対象企業・調査テーマ・スクリーニング質問などをそのまま貼り付けてください。<br>業界グループ別にCurrent Company＋キーワードを自動で作成します。</div>
+
+      <div class="section-label">案件情報</div>
+      <textarea id="input" placeholder="例）
+■対象企業
+建材卸、建設会社、建材メーカー、商社建材部門等でご経験をお持ちの方を探しております。
+
+・タカラスタンダード福岡支社
+・LIXIL
+・竹中工務店
+...
+
+■ヒアリングテーマ
+建材卸市場の構造、九州地場企業の競争優位性、価格転嫁..."></textarea>
+
+      <div id="errorBox" class="error-box"></div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="generateBtn" onclick="generate()">検索条件を生成する →</button>
+        <button class="btn-secondary" onclick="loadSample()">サンプルを入力</button>
+      </div>
+
+      <div class="hint">
+        💡 企業名・業界・調査テーマ・スクリーニング質問など、あるものをそのまま貼り付けるだけでOKです。<br>
+        業界分類・キーワード強度・英語名の補完はAIが自動で判断します。
+      </div>
+    </div>
+
+    <div class="loading-state" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loadingText">案件情報を分析中...</div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="step2" style="display:none; flex-direction:column; width:100%;">
+    <div class="result-header">
+      <button class="btn-back" onclick="backToInput()">← 戻る</button>
+      <div class="result-title" id="resultTitle">検索条件 生成済み</div>
+    </div>
+    <div class="result-body" id="resultBody"></div>
+  </div>
+</main>
+
+<script>
+const SAMPLE = `■対象企業
+建材卸、建設会社、建材メーカー、商社建材部門等でご経験をお持ちの方を探しております。
+
+__資材メーカー系__
+・タカラスタンダード福岡支社
+・LIXILビル
+・YKK AP
+・日本板硝子ビルディングプロダクツ
+・太平洋セメント等
+
+__商社系__
+・NSプロスチール建材
+・ヨドコウ商事
+・日鉄物産　九州支店
+・中林安全硝子商事
+・JFE商事テールワン等
+
+__大手ゼネコン__
+・竹中工務店
+・大成建設　九州支店
+・大末建設等
+
+__九州地場ゼネコン__
+・未来図建設
+・中村建設
+・西海建設等
+
+__卸/工事__
+・セキノ興産
+・渡辺パイプ
+・小園硝子商会等
+
+■ヒアリングテーマ
+・建材卸市場の構造、上位企業の特徴
+・九州地場企業の競争優位性や課題
+・卸と工事事業それぞれの収益構造
+・資材価格高騰時の価格転嫁
+・バリューアップ施策
+
+■対象エリア
+九州地域における知見がある方が望ましい`;
+
+function loadSample() {
+  document.getElementById('input').value = SAMPLE;
+}
+
+function backToInput() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'flex';
+  document.getElementById('s1').classList.add('active');
+  document.getElementById('s2').classList.remove('active', 'done');
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('input').parentElement.style.display = 'flex';
+}
+
+function showLoading(msg) {
+  document.querySelector('.input-area').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('loadingText').textContent = msg;
+}
+
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+
+const loadingMessages = [
+  '案件情報を分析中...',
+  '業界グループを分類中...',
+  'キーワード強度を判定中...',
+  '英語名を補完中...',
+  '検索条件を生成中...'
+];
+
+let loadingInterval;
+function startLoadingCycle() {
+  let i = 0;
+  document.getElementById('loadingText').textContent = loadingMessages[0];
+  loadingInterval = setInterval(() => {
+    i = (i + 1) % loadingMessages.length;
+    document.getElementById('loadingText').textContent = loadingMessages[i];
+  }, 1800);
+}
+
+function stopLoadingCycle() {
+  clearInterval(loadingInterval);
+}
+
+async function generate() {
+  const input = document.getElementById('input').value.trim();
+  const errorBox = document.getElementById('errorBox');
+  errorBox.style.display = 'none';
+
+  if (!input) {
+    errorBox.textContent = '案件情報を入力してください。';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  document.getElementById('generateBtn').disabled = true;
+  showLoading('案件情報を分析中...');
+  startLoadingCycle();
+
+  const prompt = `あなたはLinkedIn Sales Navigatorの検索条件を生成する専門家です。
+
+以下の案件情報を分析して、業界グループ別の検索条件をJSON形式で出力してください。
+
+【案件情報】
+${input}
+
+【出力ルール】
+1. 企業を業界カテゴリ別にグループ分けする（最大8グループ）
+2. 各グループに対して以下を生成する：
+   - groupName: グループ名（日本語）
+   - companies: 企業名リスト（日本語正式名称、法人格除く）
+   - companyBoolean: Current Company用ブーリアン文字列（日本語名 OR 英語名 の形式、""で囲む）
+   - keyword: キーワード1つ（日本語 OR 英語 の形式）
+   - keywordStrength: "strict"（500人以上の大手多め）/ "mid"（中規模）/ "loose"（小規模・地場企業多め）
+   - keywordUrl: キーワードをURLエンコードしたSales Navigator URL（https://www.linkedin.com/sales/search/people?keywords=エンコード済み文字列）
+
+【キーワード設定指針】
+- 大手・中堅（strict）: 職種を具体的に → 例：「資材調達 OR materials procurement」「建材営業 OR building materials sales」
+- 中規模（mid）: 職種＋業務 → 例：「建材 営業 OR building materials」「商社 建材 OR trading building materials」
+- 小規模・地場（loose）: 広めの職種 → 例：「営業 OR sales」「建設 OR construction」「卸売 OR wholesale」
+
+【URLエンコードルール】
+- スペース→%20
+- "→%22
+- OR→%20OR%20
+- 例: "建材営業" OR "building materials sales" → %22%E5%BB%BA%E6%9D%90%E5%96%B6%E6%A5%AD%22%20OR%20%22building%20materials%20sales%22
+
+必ずJSON配列のみを返してください。説明文やマークダウンは不要です。
+形式:
+[
+  {
+    "groupName": "資材メーカー系",
+    "companies": ["タカラスタンダード", "LIXIL"],
+    "companyBoolean": "\\"タカラスタンダード\\" OR \\"Takara Standard\\" OR \\"LIXIL\\"",
+    "keyword": "建材営業 OR building materials sales",
+    "keywordStrength": "strict",
+    "keywordUrl": "https://www.linkedin.com/sales/search/people?keywords=%22%E5%BB%BA%E6%9D%90%E5%96%B6%E6%A5%AD%22%20OR%20%22building%20materials%20sales%22"
+  }
+]`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 3000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const groups = JSON.parse(clean);
+
+    stopLoadingCycle();
+    hideLoading();
+    renderResult(groups);
+
+  } catch (e) {
+    stopLoadingCycle();
+    hideLoading();
+    document.querySelector('.input-area').style.display = 'flex';
+    errorBox.textContent = '生成に失敗しました。もう一度お試しください。（' + e.message + '）';
+    errorBox.style.display = 'block';
+    document.getElementById('generateBtn').disabled = false;
+  }
+}
+
+const letters = 'ABCDEFGH';
+const strengthLabel = { strict: '大手向け・厳密', mid: '中規模・バランス', loose: '小規模・緩め' };
+const strengthClass = { strict: 'tag-strict', mid: 'tag-mid', loose: 'tag-loose' };
+
+function renderResult(groups) {
+  document.getElementById('step1').style.display = 'none';
+  const step2 = document.getElementById('step2');
+  step2.style.display = 'flex';
+  document.getElementById('s1').classList.remove('active');
+  document.getElementById('s1').classList.add('done');
+  document.getElementById('s2').classList.add('active');
+  document.getElementById('resultTitle').textContent = `${groups.length}グループの検索条件を生成しました`;
+
+  const body = document.getElementById('resultBody');
+  body.innerHTML = `
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:20px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:2px solid var(--accent);">
+      ① 会社名「コピー」→ SN の Current Company に貼り付け　② KW「コピー」→ SN キーワード検索窓に貼り付け　③「開く」で検索画面へ
+    </div>
+  ` + groups.map((g, i) => `
+    <div class="group-card" style="animation-delay:${i * 0.06}s">
+      <div class="group-head">
+        <span class="group-letter">${letters[i] || i+1}</span>
+        <div>
+          <div class="group-name">${g.groupName}</div>
+          <div class="group-companies">${(g.companies || []).join(' / ')}</div>
+        </div>
+        <span class="tag ${strengthClass[g.keywordStrength] || 'tag-mid'}" style="margin-left:auto;flex-shrink:0;">${strengthLabel[g.keywordStrength] || ''}</span>
+      </div>
+      <div class="group-body">
+        <div class="fields">
+          <div>
+            <div class="field-label">CURRENT COMPANY — そのままコピペ</div>
+            <div class="field-value" id="co${i}">${escHtml(g.companyBoolean)}</div>
+          </div>
+          <div>
+            <div class="field-label">KEYWORD — 検索窓にコピペ</div>
+            <div class="field-value kw" id="kw${i}">${escHtml(g.keyword)}</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="copy-btn" onclick="cp('co${i}',this)">会社名<br>コピー</button>
+          <button class="copy-btn" onclick="cp('kw${i}',this)">KW<br>コピー</button>
+          <a class="open-btn" href="${escHtml(g.keywordUrl)}" target="_blank">開く →</a>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('generateBtn').disabled = false;
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function cp(id, btn) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '済 ✓';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('ok'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
