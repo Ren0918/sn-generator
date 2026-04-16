@@ -6,364 +6,87 @@
 <title>SN Search Generator</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap');
-
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #2e2e2e;
-    --border2: #3a3a3a;
-    --text: #e8e8e0;
-    --text2: #888880;
-    --text3: #555550;
-    --accent: #c8f060;
-    --accent2: #60c8f0;
-    --accent3: #f0a060;
-    --danger: #f06060;
-    --mono: 'IBM Plex Mono', monospace;
-    --sans: 'Syne', sans-serif;
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
+    --border: #2e2e2e; --border2: #3a3a3a;
+    --text: #e8e8e0; --text2: #888880; --text3: #555550;
+    --accent: #c8f060; --accent2: #60c8f0; --accent3: #f0a060;
+    --slack: #4ac578; --danger: #f06060;
+    --mono: 'IBM Plex Mono', monospace; --sans: 'Syne', sans-serif;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  header {
-    padding: 20px 32px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .logo {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-    font-family: var(--mono);
-  }
-
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 14px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .logo { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; color: var(--accent); font-family: var(--mono); flex-shrink: 0; }
   .logo span { color: var(--text2); }
-
-  .step-bar {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text3);
-  }
-
+  .webhook-row { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 260px; }
+  .webhook-label { font-family: var(--mono); font-size: 10px; color: var(--text3); white-space: nowrap; }
+  .webhook-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--text2); font-family: var(--mono); font-size: 10px; padding: 5px 10px; outline: none; transition: border-color 0.2s; min-width: 0; }
+  .webhook-input:focus { border-color: var(--slack); color: var(--text); }
+  .webhook-input.saved { border-color: rgba(74,197,120,0.5); color: var(--slack); }
+  .save-btn { font-family: var(--mono); font-size: 10px; padding: 5px 10px; border: 1px solid var(--border2); border-radius: 4px; background: transparent; color: var(--text3); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .save-btn:hover { border-color: var(--slack); color: var(--slack); }
+  .save-btn.ok { border-color: var(--slack); color: var(--slack); }
+  .step-bar { display: flex; gap: 4px; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--text3); flex-shrink: 0; margin-left: auto; }
   .step-bar .s { padding: 3px 8px; border-radius: 3px; transition: all 0.2s; }
   .step-bar .s.active { background: var(--accent); color: #0f0f0f; font-weight: 500; }
   .step-bar .s.done { color: var(--accent); }
   .step-bar .sep { color: var(--border2); }
-
   main { flex: 1; display: flex; }
-
-  /* STEP 1: INPUT */
   #step1 { width: 100%; display: flex; flex-direction: column; }
-
-  .input-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 32px;
-    max-width: 800px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  .section-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text3);
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 6px;
-  }
-
+  .input-area { flex: 1; display: flex; flex-direction: column; padding: 32px; max-width: 800px; margin: 0 auto; width: 100%; }
+  .section-label { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 0.1em; margin-bottom: 8px; }
+  h1 { font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 6px; }
   h1 em { color: var(--accent); font-style: normal; }
-
-  .desc {
-    font-size: 13px;
-    color: var(--text2);
-    margin-bottom: 28px;
-    line-height: 1.6;
-    font-family: var(--mono);
-  }
-
-  textarea {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 1.7;
-    padding: 16px;
-    resize: vertical;
-    min-height: 280px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
+  .desc { font-size: 13px; color: var(--text2); margin-bottom: 28px; line-height: 1.6; font-family: var(--mono); }
+  textarea { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 12px; line-height: 1.7; padding: 16px; resize: vertical; min-height: 280px; width: 100%; outline: none; transition: border-color 0.2s; }
   textarea:focus { border-color: var(--accent); }
   textarea::placeholder { color: var(--text3); }
-
   .btn-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #0f0f0f;
-    border: none;
-    border-radius: 6px;
-    padding: 12px 28px;
-    font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    letter-spacing: 0.04em;
-  }
-
+  .btn-primary { background: var(--accent); color: #0f0f0f; border: none; border-radius: 6px; padding: 12px 28px; font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
   .btn-primary:hover { opacity: 0.88; }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--text2);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 12px 20px;
-    font-family: var(--sans);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
+  .btn-secondary { background: transparent; color: var(--text2); border: 1px solid var(--border2); border-radius: 6px; padding: 12px 20px; font-family: var(--sans); font-size: 13px; cursor: pointer; transition: all 0.2s; }
   .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
-
-  .loading-state {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    padding: 60px;
-    flex: 1;
-  }
-
-  .spinner {
-    width: 40px; height: 40px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
+  .loading-state { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 60px; flex: 1; }
+  .spinner { width: 40px; height: 40px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loading-text {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text2);
-  }
-
-  /* STEP 2: RESULT */
+  .loading-text { font-family: var(--mono); font-size: 12px; color: var(--text2); }
   #step2 { display: none; width: 100%; flex-direction: column; }
-
-  .result-header {
-    padding: 16px 32px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .btn-back {
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    border-radius: 5px;
-    padding: 6px 14px;
-    font-family: var(--mono);
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
+  .result-header { padding: 12px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .btn-back { background: transparent; border: 1px solid var(--border2); color: var(--text2); border-radius: 5px; padding: 6px 14px; font-family: var(--mono); font-size: 11px; cursor: pointer; transition: all 0.2s; }
   .btn-back:hover { border-color: var(--text2); color: var(--text); }
-
-  .result-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text2);
-    font-family: var(--mono);
-  }
-
-  .result-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 28px 32px;
-  }
-
-  .group-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 16px;
-    overflow: hidden;
-    animation: fadeUp 0.3s ease both;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .group-head {
-    padding: 12px 16px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-
-  .group-letter {
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--accent);
-    background: rgba(200,240,96,0.1);
-    padding: 2px 7px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-
+  .result-title { font-size: 13px; font-weight: 600; color: var(--text2); font-family: var(--mono); }
+  .slack-all-btn { font-family: var(--mono); font-size: 11px; padding: 7px 16px; border: 1px solid rgba(74,197,120,0.5); border-radius: 6px; background: rgba(74,197,120,0.08); color: var(--slack); cursor: pointer; transition: all 0.15s; margin-left: auto; }
+  .slack-all-btn:hover { background: rgba(74,197,120,0.15); }
+  .slack-all-btn.sent { border-color: var(--accent); color: var(--accent); }
+  .slack-all-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .result-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
+  .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; animation: fadeUp 0.3s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .group-head { padding: 12px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .group-letter { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--accent); background: rgba(200,240,96,0.1); padding: 2px 7px; border-radius: 3px; flex-shrink: 0; }
   .group-name { font-size: 14px; font-weight: 600; }
-
-  .group-companies {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text2);
-    margin-top: 2px;
-  }
-
+  .group-companies { font-family: var(--mono); font-size: 11px; color: var(--text2); margin-top: 2px; width: 100%; }
   .group-body { padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
-
   .fields { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-
-  .field-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    letter-spacing: 0.08em;
-    margin-bottom: 4px;
-  }
-
-  .field-value {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 10px;
-    line-height: 1.7;
-    word-break: break-all;
-    user-select: all;
-    cursor: text;
-  }
-
+  .field-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; margin-bottom: 4px; }
+  .field-value { font-family: var(--mono); font-size: 11px; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; line-height: 1.7; word-break: break-all; user-select: all; cursor: text; }
   .field-value.kw { color: var(--accent2); font-weight: 500; }
-
-  .actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-
-  .copy-btn {
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 6px 12px;
-    border: 1px solid var(--border2);
-    border-radius: 5px;
-    background: transparent;
-    color: var(--text2);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s;
-    text-align: center;
-  }
-
+  .actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; min-width: 72px; }
+  .copy-btn { font-family: var(--mono); font-size: 10px; padding: 6px 12px; border: 1px solid var(--border2); border-radius: 5px; background: transparent; color: var(--text2); cursor: pointer; white-space: nowrap; transition: all 0.15s; text-align: center; }
   .copy-btn:hover { border-color: var(--text2); color: var(--text); }
   .copy-btn.ok { border-color: var(--accent); color: var(--accent); }
-
-  .open-btn {
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 6px 12px;
-    border: 1px solid rgba(96,200,240,0.4);
-    border-radius: 5px;
-    background: transparent;
-    color: var(--accent2);
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.15s;
-    display: block;
-  }
-
+  .open-btn { font-family: var(--mono); font-size: 10px; padding: 6px 12px; border: 1px solid rgba(96,200,240,0.4); border-radius: 5px; background: transparent; color: var(--accent2); text-decoration: none; text-align: center; transition: all 0.15s; display: block; }
   .open-btn:hover { background: rgba(96,200,240,0.08); }
-
-  .error-box {
-    background: rgba(240,96,96,0.08);
-    border: 1px solid rgba(240,96,96,0.3);
-    border-radius: 8px;
-    padding: 16px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--danger);
-    margin-top: 12px;
-    display: none;
-  }
-
-  .hint {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text3);
-    margin-top: 10px;
-    line-height: 1.6;
-    padding: 10px 14px;
-    background: var(--surface);
-    border-radius: 6px;
-    border-left: 2px solid var(--accent);
-  }
-
-  .tag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin-right: 4px;
-  }
-
+  .slack-btn { font-family: var(--mono); font-size: 10px; padding: 6px 12px; border: 1px solid rgba(74,197,120,0.4); border-radius: 5px; background: transparent; color: var(--slack); cursor: pointer; white-space: nowrap; transition: all 0.15s; text-align: center; }
+  .slack-btn:hover { background: rgba(74,197,120,0.08); }
+  .slack-btn.ok { border-color: var(--accent); color: var(--accent); }
+  .slack-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .error-box { background: rgba(240,96,96,0.08); border: 1px solid rgba(240,96,96,0.3); border-radius: 8px; padding: 16px; font-family: var(--mono); font-size: 12px; color: var(--danger); margin-top: 12px; display: none; }
+  .hint { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 10px; line-height: 1.6; padding: 10px 14px; background: var(--surface); border-radius: 6px; border-left: 2px solid var(--accent); }
+  .tag { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-left: auto; }
   .tag-strict { background: rgba(200,240,96,0.12); color: var(--accent); }
   .tag-mid { background: rgba(96,200,240,0.12); color: var(--accent2); }
   .tag-loose { background: rgba(240,160,96,0.12); color: var(--accent3); }
@@ -373,6 +96,11 @@
 
 <header>
   <div class="logo">SN<span>/</span>SEARCH<span>_</span>GEN</div>
+  <div class="webhook-row">
+    <span class="webhook-label">Slack Webhook</span>
+    <input class="webhook-input" id="webhookInput" type="password" placeholder="https://hooks.slack.com/services/..." />
+    <button class="save-btn" id="saveWebhookBtn" onclick="saveWebhook()">保存</button>
+  </div>
   <div class="step-bar">
     <span class="s active" id="s1">01 入力</span>
     <span class="sep">›</span>
@@ -381,13 +109,11 @@
 </header>
 
 <main>
-  <!-- STEP 1 -->
   <div id="step1" style="display:flex; flex-direction:column; width:100%;">
     <div class="input-area">
       <div class="section-label">SALES NAVIGATOR SEARCH GENERATOR</div>
       <h1>案件情報を貼って<br><em>検索条件を自動生成</em></h1>
       <div class="desc">対象企業・調査テーマ・スクリーニング質問などをそのまま貼り付けてください。<br>業界グループ別にCurrent Company＋キーワードを自動で作成します。</div>
-
       <div class="section-label">案件情報</div>
       <textarea id="input" placeholder="例）
 ■対象企業
@@ -396,35 +122,30 @@
 ・タカラスタンダード福岡支社
 ・LIXIL
 ・竹中工務店
-...
 
 ■ヒアリングテーマ
 建材卸市場の構造、九州地場企業の競争優位性、価格転嫁..."></textarea>
-
       <div id="errorBox" class="error-box"></div>
-
       <div class="btn-row">
         <button class="btn-primary" id="generateBtn" onclick="generate()">検索条件を生成する →</button>
         <button class="btn-secondary" onclick="loadSample()">サンプルを入力</button>
       </div>
-
       <div class="hint">
         💡 企業名・業界・調査テーマ・スクリーニング質問など、あるものをそのまま貼り付けるだけでOKです。<br>
-        業界分類・キーワード強度・英語名の補完はAIが自動で判断します。
+        Slack投稿したい場合は右上にWebhook URLを入力して「保存」してください（ブラウザに記憶されます）。
       </div>
     </div>
-
     <div class="loading-state" id="loading">
       <div class="spinner"></div>
       <div class="loading-text" id="loadingText">案件情報を分析中...</div>
     </div>
   </div>
 
-  <!-- STEP 2 -->
   <div id="step2" style="display:none; flex-direction:column; width:100%;">
     <div class="result-header">
       <button class="btn-back" onclick="backToInput()">← 戻る</button>
       <div class="result-title" id="resultTitle">検索条件 生成済み</div>
+      <button class="slack-all-btn" id="slackAllBtn" onclick="postAllToSlack(this)">Slackに全投稿</button>
     </div>
     <div class="result-body" id="resultBody"></div>
   </div>
@@ -438,99 +159,77 @@ __資材メーカー系__
 ・タカラスタンダード福岡支社
 ・LIXILビル
 ・YKK AP
-・日本板硝子ビルディングプロダクツ
-・太平洋セメント等
 
 __商社系__
 ・NSプロスチール建材
 ・ヨドコウ商事
 ・日鉄物産　九州支店
-・中林安全硝子商事
-・JFE商事テールワン等
 
 __大手ゼネコン__
 ・竹中工務店
 ・大成建設　九州支店
-・大末建設等
-
-__九州地場ゼネコン__
-・未来図建設
-・中村建設
-・西海建設等
 
 __卸/工事__
 ・セキノ興産
 ・渡辺パイプ
-・小園硝子商会等
+・小園硝子商会
 
 ■ヒアリングテーマ
-・建材卸市場の構造、上位企業の特徴
+・建材卸市場の構造
 ・九州地場企業の競争優位性や課題
-・卸と工事事業それぞれの収益構造
 ・資材価格高騰時の価格転嫁
-・バリューアップ施策
 
 ■対象エリア
 九州地域における知見がある方が望ましい`;
 
-function loadSample() {
-  document.getElementById('input').value = SAMPLE;
+function loadSample() { document.getElementById('input').value = SAMPLE; }
+
+function saveWebhook() {
+  const val = document.getElementById('webhookInput').value.trim();
+  if (!val) return;
+  localStorage.setItem('sn_slack_webhook', val);
+  const btn = document.getElementById('saveWebhookBtn');
+  const input = document.getElementById('webhookInput');
+  btn.textContent = '済 ✓'; btn.classList.add('ok');
+  input.classList.add('saved');
+  setTimeout(() => { btn.textContent = '保存'; btn.classList.remove('ok'); }, 2000);
 }
+
+function getWebhook() {
+  return document.getElementById('webhookInput').value.trim() || localStorage.getItem('sn_slack_webhook') || '';
+}
+
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('sn_slack_webhook');
+  if (saved) { document.getElementById('webhookInput').value = saved; document.getElementById('webhookInput').classList.add('saved'); }
+});
 
 function backToInput() {
   document.getElementById('step2').style.display = 'none';
   document.getElementById('step1').style.display = 'flex';
   document.getElementById('s1').classList.add('active');
-  document.getElementById('s2').classList.remove('active', 'done');
+  document.getElementById('s2').classList.remove('active','done');
   document.getElementById('loading').style.display = 'none';
-  document.getElementById('input').parentElement.style.display = 'flex';
+  document.querySelector('.input-area').style.display = 'flex';
 }
 
-function showLoading(msg) {
-  document.querySelector('.input-area').style.display = 'none';
-  document.getElementById('loading').style.display = 'flex';
-  document.getElementById('loadingText').textContent = msg;
-}
-
-function hideLoading() {
-  document.getElementById('loading').style.display = 'none';
-}
-
-const loadingMessages = [
-  '案件情報を分析中...',
-  '業界グループを分類中...',
-  'キーワード強度を判定中...',
-  '英語名を補完中...',
-  '検索条件を生成中...'
-];
-
+const loadingMessages = ['案件情報を分析中...','業界グループを分類中...','キーワード強度を判定中...','英語名を補完中...','検索条件を生成中...'];
 let loadingInterval;
 function startLoadingCycle() {
   let i = 0;
   document.getElementById('loadingText').textContent = loadingMessages[0];
-  loadingInterval = setInterval(() => {
-    i = (i + 1) % loadingMessages.length;
-    document.getElementById('loadingText').textContent = loadingMessages[i];
-  }, 1800);
+  loadingInterval = setInterval(() => { i=(i+1)%loadingMessages.length; document.getElementById('loadingText').textContent = loadingMessages[i]; }, 1800);
 }
-
-function stopLoadingCycle() {
-  clearInterval(loadingInterval);
-}
+function stopLoadingCycle() { clearInterval(loadingInterval); }
 
 async function generate() {
   const input = document.getElementById('input').value.trim();
   const errorBox = document.getElementById('errorBox');
   errorBox.style.display = 'none';
-
-  if (!input) {
-    errorBox.textContent = '案件情報を入力してください。';
-    errorBox.style.display = 'block';
-    return;
-  }
-
+  if (!input) { errorBox.textContent = '案件情報を入力してください。'; errorBox.style.display = 'block'; return; }
   document.getElementById('generateBtn').disabled = true;
-  showLoading('案件情報を分析中...');
+  document.querySelector('.input-area').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
   startLoadingCycle();
 
   const prompt = `あなたはLinkedIn Sales Navigatorの検索条件を生成する専門家です。
@@ -544,93 +243,70 @@ ${input}
 1. 企業を業界カテゴリ別にグループ分けする（最大8グループ）
 2. 各グループに対して以下を生成する：
    - groupName: グループ名（日本語）
-   - companies: 企業名リスト（日本語正式名称、法人格除く）
-   - companyBoolean: Current Company用ブーリアン文字列（日本語名 OR 英語名 の形式、""で囲む）
-   - keyword: キーワード1つ（日本語 OR 英語 の形式）
-   - keywordStrength: "strict"（500人以上の大手多め）/ "mid"（中規模）/ "loose"（小規模・地場企業多め）
-   - keywordUrl: キーワードをURLエンコードしたSales Navigator URL（https://www.linkedin.com/sales/search/people?keywords=エンコード済み文字列）
+   - companies: 企業名リスト（法人格除く）
+   - companyBoolean: Current Company用（"日本語名" OR "英語名" の形式、""で囲む）
+   - keyword: キーワード1セット（「日本語 OR English」の形式）
+   - keywordStrength: "strict"（大手500人以上）/ "mid"（中規模）/ "loose"（小規模）
+   - keywordUrl: https://www.linkedin.com/sales/search/people?keywords=URLエンコード済み
 
-【キーワード設定指針】
-- 大手・中堅（strict）: 職種を具体的に → 例：「資材調達 OR materials procurement」「建材営業 OR building materials sales」
-- 中規模（mid）: 職種＋業務 → 例：「建材 営業 OR building materials」「商社 建材 OR trading building materials」
-- 小規模・地場（loose）: 広めの職種 → 例：「営業 OR sales」「建設 OR construction」「卸売 OR wholesale」
+【キーワード指針】
+- strict: 職種具体的 → 例：「資材調達 OR materials procurement」
+- mid: 職種＋業務 → 例：「建材 営業 OR building materials」
+- loose: 広めの職種 → 例：「営業 OR sales」
 
-【URLエンコードルール】
-- スペース→%20
-- "→%22
-- OR→%20OR%20
-- 例: "建材営業" OR "building materials sales" → %22%E5%BB%BA%E6%9D%90%E5%96%B6%E6%A5%AD%22%20OR%20%22building%20materials%20sales%22
+URLエンコード：スペース→%20、"→%22、OR間→%20OR%20
 
-必ずJSON配列のみを返してください。説明文やマークダウンは不要です。
-形式:
-[
-  {
-    "groupName": "資材メーカー系",
-    "companies": ["タカラスタンダード", "LIXIL"],
-    "companyBoolean": "\\"タカラスタンダード\\" OR \\"Takara Standard\\" OR \\"LIXIL\\"",
-    "keyword": "建材営業 OR building materials sales",
-    "keywordStrength": "strict",
-    "keywordUrl": "https://www.linkedin.com/sales/search/people?keywords=%22%E5%BB%BA%E6%9D%90%E5%96%B6%E6%A5%AD%22%20OR%20%22building%20materials%20sales%22"
-  }
-]`;
+必ずJSON配列のみ返してください。説明文・マークダウン不要。
+形式: [{"groupName":"","companies":[],"companyBoolean":"","keyword":"","keywordStrength":"","keywordUrl":""}]`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 3000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
     });
-
     const data = await res.json();
     const text = data.content?.[0]?.text || '';
-    const clean = text.replace(/```json|```/g, '').trim();
+    const clean = text.replace(/```json|```/g,'').trim();
     const groups = JSON.parse(clean);
-
-    stopLoadingCycle();
-    hideLoading();
+    stopLoadingCycle(); document.getElementById('loading').style.display = 'none';
     renderResult(groups);
-
-  } catch (e) {
-    stopLoadingCycle();
-    hideLoading();
+  } catch(e) {
+    stopLoadingCycle(); document.getElementById('loading').style.display = 'none';
     document.querySelector('.input-area').style.display = 'flex';
-    errorBox.textContent = '生成に失敗しました。もう一度お試しください。（' + e.message + '）';
-    errorBox.style.display = 'block';
+    document.getElementById('errorBox').textContent = '生成に失敗しました。もう一度お試しください。';
+    document.getElementById('errorBox').style.display = 'block';
     document.getElementById('generateBtn').disabled = false;
   }
 }
 
 const letters = 'ABCDEFGH';
-const strengthLabel = { strict: '大手向け・厳密', mid: '中規模・バランス', loose: '小規模・緩め' };
-const strengthClass = { strict: 'tag-strict', mid: 'tag-mid', loose: 'tag-loose' };
+const strengthLabel = { strict:'大手・厳密', mid:'中規模・バランス', loose:'小規模・緩め' };
+const strengthClass = { strict:'tag-strict', mid:'tag-mid', loose:'tag-loose' };
+let currentGroups = [];
 
 function renderResult(groups) {
+  currentGroups = groups;
   document.getElementById('step1').style.display = 'none';
-  const step2 = document.getElementById('step2');
-  step2.style.display = 'flex';
-  document.getElementById('s1').classList.remove('active');
-  document.getElementById('s1').classList.add('done');
+  document.getElementById('step2').style.display = 'flex';
+  document.getElementById('s1').classList.remove('active'); document.getElementById('s1').classList.add('done');
   document.getElementById('s2').classList.add('active');
   document.getElementById('resultTitle').textContent = `${groups.length}グループの検索条件を生成しました`;
 
   const body = document.getElementById('resultBody');
   body.innerHTML = `
     <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:20px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:2px solid var(--accent);">
-      ① 会社名「コピー」→ SN の Current Company に貼り付け　② KW「コピー」→ SN キーワード検索窓に貼り付け　③「開く」で検索画面へ
+      ① 会社名コピー → SN の Current Company に貼り付け　② KWコピー → SN キーワード検索窓に貼り付け　③「開く」で検索へ　④「Slack」で投稿
     </div>
-  ` + groups.map((g, i) => `
-    <div class="group-card" style="animation-delay:${i * 0.06}s">
+  ` + groups.map((g,i) => `
+    <div class="group-card" style="animation-delay:${i*0.06}s">
       <div class="group-head">
-        <span class="group-letter">${letters[i] || i+1}</span>
-        <div>
+        <span class="group-letter">${letters[i]||i+1}</span>
+        <div style="flex:1;">
           <div class="group-name">${g.groupName}</div>
-          <div class="group-companies">${(g.companies || []).join(' / ')}</div>
+          <div class="group-companies">${(g.companies||[]).join(' / ')}</div>
         </div>
-        <span class="tag ${strengthClass[g.keywordStrength] || 'tag-mid'}" style="margin-left:auto;flex-shrink:0;">${strengthLabel[g.keywordStrength] || ''}</span>
+        <span class="tag ${strengthClass[g.keywordStrength]||'tag-mid'}">${strengthLabel[g.keywordStrength]||''}</span>
       </div>
       <div class="group-body">
         <div class="fields">
@@ -647,26 +323,57 @@ function renderResult(groups) {
           <button class="copy-btn" onclick="cp('co${i}',this)">会社名<br>コピー</button>
           <button class="copy-btn" onclick="cp('kw${i}',this)">KW<br>コピー</button>
           <a class="open-btn" href="${escHtml(g.keywordUrl)}" target="_blank">開く →</a>
+          <button class="slack-btn" onclick="postToSlack(${i},this)">Slack<br>投稿</button>
         </div>
       </div>
     </div>
   `).join('');
-
   document.getElementById('generateBtn').disabled = false;
 }
 
-function escHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function cp(id, btn) {
-  const el = document.getElementById(id);
-  navigator.clipboard.writeText(el.innerText).then(() => {
-    const orig = btn.innerHTML;
-    btn.innerHTML = '済 ✓';
-    btn.classList.add('ok');
+  navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
+    const orig = btn.innerHTML; btn.innerHTML = '済 ✓'; btn.classList.add('ok');
     setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('ok'); }, 2000);
   });
+}
+
+function buildSlackMessage(g, letter) {
+  return `*${letter}｜${g.groupName}*\n` +
+    `対象企業：${(g.companies||[]).join(' / ')}\n\n` +
+    `*Current Company（コピペ用）*\n\`\`\`${g.companyBoolean}\`\`\`\n` +
+    `*キーワード（コピペ用）*\n\`\`\`${g.keyword}\`\`\`\n` +
+    `<${g.keywordUrl}|🔗 Sales Navigator で開く>`;
+}
+
+async function postToSlack(idx, btn) {
+  const webhook = getWebhook();
+  if (!webhook) { alert('右上にSlack Webhook URLを入力して「保存」してください。'); return; }
+  btn.disabled = true; btn.innerHTML = '送信中...';
+  try {
+    await fetch(webhook, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ text: buildSlackMessage(currentGroups[idx], letters[idx]||idx+1) }), mode:'no-cors' });
+    btn.innerHTML = '済 ✓'; btn.classList.add('ok');
+  } catch(e) {
+    btn.disabled = false; btn.innerHTML = 'Slack<br>投稿';
+    alert('投稿に失敗しました。');
+  }
+}
+
+async function postAllToSlack(btn) {
+  const webhook = getWebhook();
+  if (!webhook) { alert('右上にSlack Webhook URLを入力して「保存」してください。'); return; }
+  btn.disabled = true; btn.textContent = '送信中...';
+  const header = `*SN検索条件 — ${currentGroups.length}グループ*\n━━━━━━━━━━━━━━━━`;
+  const body = currentGroups.map((g,i) => buildSlackMessage(g, letters[i]||i+1)).join('\n\n━━━━━━━━━━━━━━━━\n\n');
+  try {
+    await fetch(webhook, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ text: header+'\n\n'+body }), mode:'no-cors' });
+    btn.textContent = '投稿済み ✓'; btn.classList.add('sent');
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Slackに全投稿';
+    alert('投稿に失敗しました。');
+  }
 }
 </script>
 </body>
