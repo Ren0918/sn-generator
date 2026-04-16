@@ -16,22 +16,38 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; display: flex; flex-direction: column; }
-  header { padding: 14px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+  /* SETUP MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 32px; max-width: 480px; width: 90%; }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .modal-title em { color: var(--accent); font-style: normal; }
+  .modal-desc { font-family: var(--mono); font-size: 11px; color: var(--text2); line-height: 1.7; margin-bottom: 24px; }
+  .modal-field { margin-bottom: 16px; }
+  .modal-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; margin-bottom: 6px; }
+  .modal-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 11px; padding: 8px 12px; outline: none; transition: border-color 0.2s; }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-input::placeholder { color: var(--text3); }
+  .modal-btn { width: 100%; background: var(--accent); color: #0f0f0f; border: none; border-radius: 6px; padding: 12px; font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+  .modal-btn:hover { opacity: 0.88; }
+  .modal-skip { display: block; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 12px; cursor: pointer; text-decoration: underline; }
+  .modal-skip:hover { color: var(--text2); }
+
+  header { padding: 14px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .logo { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; color: var(--accent); font-family: var(--mono); flex-shrink: 0; }
   .logo span { color: var(--text2); }
-  .webhook-row { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 260px; }
-  .webhook-label { font-family: var(--mono); font-size: 10px; color: var(--text3); white-space: nowrap; }
-  .webhook-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--text2); font-family: var(--mono); font-size: 10px; padding: 5px 10px; outline: none; transition: border-color 0.2s; min-width: 0; }
-  .webhook-input:focus { border-color: var(--slack); color: var(--text); }
-  .webhook-input.saved { border-color: rgba(74,197,120,0.5); color: var(--slack); }
-  .save-btn { font-family: var(--mono); font-size: 10px; padding: 5px 10px; border: 1px solid var(--border2); border-radius: 4px; background: transparent; color: var(--text3); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
-  .save-btn:hover { border-color: var(--slack); color: var(--slack); }
-  .save-btn.ok { border-color: var(--slack); color: var(--slack); }
-  .step-bar { display: flex; gap: 4px; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--text3); flex-shrink: 0; margin-left: auto; }
+  .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .settings-btn { font-family: var(--mono); font-size: 10px; padding: 4px 10px; border: 1px solid var(--border2); border-radius: 4px; background: transparent; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+  .settings-btn:hover { border-color: var(--text2); color: var(--text2); }
+  .api-status { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 3px; }
+  .api-status.ok { background: rgba(74,197,120,0.1); color: var(--slack); border: 1px solid rgba(74,197,120,0.3); }
+  .api-status.ng { background: rgba(240,96,96,0.1); color: var(--danger); border: 1px solid rgba(240,96,96,0.3); }
+  .step-bar { display: flex; gap: 4px; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--text3); }
   .step-bar .s { padding: 3px 8px; border-radius: 3px; transition: all 0.2s; }
   .step-bar .s.active { background: var(--accent); color: #0f0f0f; font-weight: 500; }
   .step-bar .s.done { color: var(--accent); }
   .step-bar .sep { color: var(--border2); }
+
   main { flex: 1; display: flex; }
   #step1 { width: 100%; display: flex; flex-direction: column; }
   .input-area { flex: 1; display: flex; flex-direction: column; padding: 32px; max-width: 800px; margin: 0 auto; width: 100%; }
@@ -94,17 +110,37 @@
 </head>
 <body>
 
+<!-- SETUP MODAL -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal">
+    <div class="modal-title">初期設定 — <em>API Keys</em></div>
+    <div class="modal-desc">
+      以下を入力して保存してください。ブラウザに記憶されるので次回から不要です。<br>
+      誰でもこのツールを使えるようになります。
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">ANTHROPIC API KEY（必須）</div>
+      <input class="modal-input" id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">SLACK WEBHOOK URL（任意・Slack投稿する場合）</div>
+      <input class="modal-input" id="webhookInput" type="password" placeholder="https://hooks.slack.com/services/..." />
+    </div>
+    <button class="modal-btn" onclick="saveSettings()">保存して始める →</button>
+    <span class="modal-skip" onclick="skipSettings()">スキップ（claude.aiログイン済みのブラウザのみ動作）</span>
+  </div>
+</div>
+
 <header>
   <div class="logo">SN<span>/</span>SEARCH<span>_</span>GEN</div>
-  <div class="webhook-row">
-    <span class="webhook-label">Slack Webhook</span>
-    <input class="webhook-input" id="webhookInput" type="password" placeholder="https://hooks.slack.com/services/..." />
-    <button class="save-btn" id="saveWebhookBtn" onclick="saveWebhook()">保存</button>
-  </div>
-  <div class="step-bar">
-    <span class="s active" id="s1">01 入力</span>
-    <span class="sep">›</span>
-    <span class="s" id="s2">02 生成</span>
+  <div class="header-right">
+    <span class="api-status" id="apiStatus">API KEY 未設定</span>
+    <button class="settings-btn" onclick="openSettings()">設定</button>
+    <div class="step-bar">
+      <span class="s active" id="s1">01 入力</span>
+      <span class="sep">›</span>
+      <span class="s" id="s2">02 生成</span>
+    </div>
   </div>
 </header>
 
@@ -132,7 +168,7 @@
       </div>
       <div class="hint">
         💡 企業名・業界・調査テーマ・スクリーニング質問など、あるものをそのまま貼り付けるだけでOKです。<br>
-        Slack投稿したい場合は右上にWebhook URLを入力して「保存」してください（ブラウザに記憶されます）。
+        APIキーを設定すると、どのブラウザ・誰でも使えるようになります。
       </div>
     </div>
     <div class="loading-state" id="loading">
@@ -184,25 +220,45 @@ __卸/工事__
 
 function loadSample() { document.getElementById('input').value = SAMPLE; }
 
-function saveWebhook() {
-  const val = document.getElementById('webhookInput').value.trim();
-  if (!val) return;
-  localStorage.setItem('sn_slack_webhook', val);
-  const btn = document.getElementById('saveWebhookBtn');
-  const input = document.getElementById('webhookInput');
-  btn.textContent = '済 ✓'; btn.classList.add('ok');
-  input.classList.add('saved');
-  setTimeout(() => { btn.textContent = '保存'; btn.classList.remove('ok'); }, 2000);
-}
+function getApiKey() { return localStorage.getItem('sn_api_key') || ''; }
+function getWebhook() { return localStorage.getItem('sn_slack_webhook') || ''; }
 
-function getWebhook() {
-  return document.getElementById('webhookInput').value.trim() || localStorage.getItem('sn_slack_webhook') || '';
+function updateApiStatus() {
+  const el = document.getElementById('apiStatus');
+  if (getApiKey()) { el.textContent = 'API KEY 設定済み'; el.className = 'api-status ok'; }
+  else { el.textContent = 'API KEY 未設定'; el.className = 'api-status ng'; }
 }
 
 window.addEventListener('load', () => {
-  const saved = localStorage.getItem('sn_slack_webhook');
-  if (saved) { document.getElementById('webhookInput').value = saved; document.getElementById('webhookInput').classList.add('saved'); }
+  const apiKey = getApiKey();
+  const webhook = getWebhook();
+  if (apiKey) {
+    document.getElementById('setupModal').style.display = 'none';
+    document.getElementById('apiKeyInput').value = apiKey;
+  }
+  if (webhook) document.getElementById('webhookInput').value = webhook;
+  updateApiStatus();
 });
+
+function saveSettings() {
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  const webhook = document.getElementById('webhookInput').value.trim();
+  if (!apiKey) { alert('APIキーを入力してください。'); return; }
+  localStorage.setItem('sn_api_key', apiKey);
+  if (webhook) localStorage.setItem('sn_slack_webhook', webhook);
+  document.getElementById('setupModal').style.display = 'none';
+  updateApiStatus();
+}
+
+function skipSettings() { document.getElementById('setupModal').style.display = 'none'; }
+
+function openSettings() {
+  const apiKey = getApiKey();
+  const webhook = getWebhook();
+  if (apiKey) document.getElementById('apiKeyInput').value = apiKey;
+  if (webhook) document.getElementById('webhookInput').value = webhook;
+  document.getElementById('setupModal').style.display = 'flex';
+}
 
 function backToInput() {
   document.getElementById('step2').style.display = 'none';
@@ -227,6 +283,10 @@ async function generate() {
   const errorBox = document.getElementById('errorBox');
   errorBox.style.display = 'none';
   if (!input) { errorBox.textContent = '案件情報を入力してください。'; errorBox.style.display = 'block'; return; }
+
+  const apiKey = getApiKey();
+  if (!apiKey) { errorBox.textContent = 'APIキーが設定されていません。右上の「設定」から入力してください。'; errorBox.style.display = 'block'; return; }
+
   document.getElementById('generateBtn').disabled = true;
   document.querySelector('.input-area').style.display = 'none';
   document.getElementById('loading').style.display = 'flex';
@@ -262,10 +322,11 @@ URLエンコード：スペース→%20、"→%22、OR間→%20OR%20
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
     const text = data.content?.[0]?.text || '';
     const clean = text.replace(/```json|```/g,'').trim();
     const groups = JSON.parse(clean);
@@ -274,7 +335,7 @@ URLエンコード：スペース→%20、"→%22、OR間→%20OR%20
   } catch(e) {
     stopLoadingCycle(); document.getElementById('loading').style.display = 'none';
     document.querySelector('.input-area').style.display = 'flex';
-    document.getElementById('errorBox').textContent = '生成に失敗しました。もう一度お試しください。';
+    document.getElementById('errorBox').textContent = '生成に失敗しました。APIキーを確認してください。（' + e.message + '）';
     document.getElementById('errorBox').style.display = 'block';
     document.getElementById('generateBtn').disabled = false;
   }
@@ -350,30 +411,24 @@ function buildSlackMessage(g, letter) {
 
 async function postToSlack(idx, btn) {
   const webhook = getWebhook();
-  if (!webhook) { alert('右上にSlack Webhook URLを入力して「保存」してください。'); return; }
+  if (!webhook) { alert('設定からSlack Webhook URLを入力してください。'); return; }
   btn.disabled = true; btn.innerHTML = '送信中...';
   try {
     await fetch(webhook, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ text: buildSlackMessage(currentGroups[idx], letters[idx]||idx+1) }), mode:'no-cors' });
     btn.innerHTML = '済 ✓'; btn.classList.add('ok');
-  } catch(e) {
-    btn.disabled = false; btn.innerHTML = 'Slack<br>投稿';
-    alert('投稿に失敗しました。');
-  }
+  } catch(e) { btn.disabled = false; btn.innerHTML = 'Slack<br>投稿'; alert('投稿に失敗しました。'); }
 }
 
 async function postAllToSlack(btn) {
   const webhook = getWebhook();
-  if (!webhook) { alert('右上にSlack Webhook URLを入力して「保存」してください。'); return; }
+  if (!webhook) { alert('設定からSlack Webhook URLを入力してください。'); return; }
   btn.disabled = true; btn.textContent = '送信中...';
   const header = `*SN検索条件 — ${currentGroups.length}グループ*\n━━━━━━━━━━━━━━━━`;
   const body = currentGroups.map((g,i) => buildSlackMessage(g, letters[i]||i+1)).join('\n\n━━━━━━━━━━━━━━━━\n\n');
   try {
     await fetch(webhook, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ text: header+'\n\n'+body }), mode:'no-cors' });
     btn.textContent = '投稿済み ✓'; btn.classList.add('sent');
-  } catch(e) {
-    btn.disabled = false; btn.textContent = 'Slackに全投稿';
-    alert('投稿に失敗しました。');
-  }
+  } catch(e) { btn.disabled = false; btn.textContent = 'Slackに全投稿'; alert('投稿に失敗しました。'); }
 }
 </script>
 </body>
