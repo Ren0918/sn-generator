@@ -6,7 +6,7 @@
 <title>SN Search Generator</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap');
-  :root {
+  :root{
     --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;
     --border:#2e2e2e;--border2:#3a3a3a;
     --text:#e8e8e0;--text2:#888880;--text3:#555550;
@@ -19,18 +19,18 @@
   header{padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
   .logo{font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--accent);font-family:var(--mono);}
   .logo span{color:var(--text2);}
-  .step-bar{display:flex;gap:4px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--text3);margin-left:auto;}
-  .step-bar .s{padding:3px 8px;border-radius:3px;transition:all .2s;}
-  .step-bar .s.active{background:var(--accent);color:#0f0f0f;font-weight:500;}
-  .step-bar .s.done{color:var(--accent);}
-  .step-bar .sep{color:var(--border2);}
-  .slack-setting{display:flex;align-items:center;gap:6px;margin-left:12px;}
+  .slack-setting{display:flex;align-items:center;gap:6px;margin-left:auto;}
   .slack-setting label{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;}
-  .slack-setting input{background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:10px;padding:4px 8px;outline:none;width:220px;transition:border-color .2s;}
+  .slack-setting input{background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:10px;padding:4px 8px;outline:none;width:240px;transition:border-color .2s;}
   .slack-setting input:focus{border-color:var(--slack);}
   .slack-setting button{font-family:var(--mono);font-size:10px;padding:4px 8px;border:1px solid var(--border2);border-radius:4px;background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;white-space:nowrap;}
   .slack-setting button:hover{border-color:var(--slack);color:var(--slack);}
   .slack-setting button.ok{border-color:var(--slack);color:var(--slack);}
+  .step-bar{display:flex;gap:4px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--text3);}
+  .step-bar .s{padding:3px 8px;border-radius:3px;transition:all .2s;}
+  .step-bar .s.active{background:var(--accent);color:#0f0f0f;font-weight:500;}
+  .step-bar .s.done{color:var(--accent);}
+  .step-bar .sep{color:var(--border2);}
   main{flex:1;display:flex;}
   #step1{width:100%;display:flex;flex-direction:column;}
   .input-area{flex:1;display:flex;flex-direction:column;padding:32px;max-width:800px;margin:0 auto;width:100%;}
@@ -89,7 +89,6 @@
   .slack-btn:hover{background:rgba(74,197,120,.08);}
   .slack-btn.ok{border-color:var(--accent);color:var(--accent);}
   .slack-btn:disabled{opacity:.4;cursor:not-allowed;}
-  .retry-notice{font-family:var(--mono);font-size:11px;color:var(--accent3);padding:8px 12px;background:rgba(240,160,96,.08);border:1px solid rgba(240,160,96,.3);border-radius:6px;margin-bottom:16px;}
 </style>
 </head>
 <body>
@@ -100,7 +99,7 @@
     <input type="password" id="webhookInput" placeholder="https://hooks.slack.com/services/...">
     <button id="saveWH" onclick="saveWebhook()">保存</button>
   </div>
-  <div class="step-bar">
+  <div class="step-bar" style="margin-left:12px;">
     <span class="s active" id="s1">01 入力</span>
     <span class="sep">›</span>
     <span class="s" id="s2">02 生成</span>
@@ -119,7 +118,6 @@
 ・タカラスタンダード
 ・LIXIL
 ・竹中工務店
-・日鉄物産
 
 ■ヒアリングテーマ
 建材卸市場の構造、九州地場企業の競争優位性、価格転嫁..."></textarea>
@@ -147,6 +145,8 @@
 </main>
 
 <script>
+const API_KEY='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';
+
 const SAMPLE=`■対象企業
 建材卸、建設会社、建材メーカー、商社建材部門等でご経験をお持ちの方を探しております。
 
@@ -176,7 +176,6 @@ __卸/工事__
 
 ■対象エリア：九州`;
 
-// Slack Webhook
 function saveWebhook(){
   const v=document.getElementById('webhookInput').value.trim();
   if(!v)return;
@@ -191,7 +190,6 @@ window.addEventListener('load',()=>{
   if(w)document.getElementById('webhookInput').value=w;
 });
 
-// UI helpers
 function backToInput(){
   document.getElementById('step2').style.display='none';
   document.getElementById('step1').style.display='flex';
@@ -200,12 +198,12 @@ function backToInput(){
   document.getElementById('loading').style.display='none';
   document.querySelector('.input-area').style.display='flex';
 }
+
 const MSGS=['案件情報を分析中...','業界グループを分類中...','キーワードを生成中...','英語名を補完中...','検索条件を整理中...'];
 let _li;
 function startLoad(){let i=0;document.getElementById('loadTxt').textContent=MSGS[0];_li=setInterval(()=>{i=(i+1)%MSGS.length;document.getElementById('loadTxt').textContent=MSGS[i];},1800);}
 function stopLoad(){clearInterval(_li);}
 
-// Prompt builder
 function buildPrompt(input){
   return `あなたはLinkedIn Sales Navigatorの検索条件を生成する専門家です。
 以下の案件情報を分析して、業界グループ別の検索条件をJSON配列で出力してください。
@@ -233,31 +231,20 @@ ${input}
 - loose（100人未満の小規模・地場）: 広めの職種 → 例: "営業 OR sales"
 
 【URLエンコードルール】
-- スペース → %20
-- " → %22
-- OR接続 → %20OR%20
-- 例: "建材営業" OR "building materials sales" → %22%E5%BB%BA%E6%9D%90%E5%96%B6%E6%A5%AD%22%20OR%20%22building%20materials%20sales%22
+- スペース → %20、" → %22、OR接続 → %20OR%20
 
 重要: JSON配列以外は何も出力しないでください。`;
 }
 
-// Extract JSON robustly
 function extractJSON(text){
-  // 1. Try direct parse
-  try{ return JSON.parse(text.trim()); }catch(e){}
-  // 2. Remove markdown fences
-  const clean=text.replace(/```json[\s\S]*?```/g,m=>m.replace(/```json\n?/,'').replace(/\n?```/,'')).replace(/```[\s\S]*?```/g,m=>m.replace(/```\n?/g,'')).trim();
-  try{ return JSON.parse(clean); }catch(e){}
-  // 3. Extract first [...] block
+  try{return JSON.parse(text.trim());}catch(e){}
+  const clean=text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+  try{return JSON.parse(clean);}catch(e){}
   const m=text.match(/\[[\s\S]*\]/);
-  if(m){ try{ return JSON.parse(m[0]); }catch(e){} }
-  // 4. Extract first {...} and wrap
-  const m2=text.match(/\{[\s\S]*\}/);
-  if(m2){ try{ return [JSON.parse(m2[0])]; }catch(e){} }
-  throw new Error('JSONの抽出に失敗しました');
+  if(m){try{return JSON.parse(m[0]);}catch(e){}}
+  throw new Error('JSONの解析に失敗しました');
 }
 
-// Main generate with retry
 let currentGroups=[];
 async function generate(retryCount=0){
   const input=document.getElementById('input').value.trim();
@@ -271,9 +258,11 @@ async function generate(retryCount=0){
   if(retryCount===0)startLoad();
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/claude',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:4000,
@@ -289,15 +278,13 @@ async function generate(retryCount=0){
     const data=await res.json();
     const text=data.content?.[0]?.text||'';
     const groups=extractJSON(text);
-
-    if(!Array.isArray(groups)||groups.length===0) throw new Error('グループが取得できませんでした');
+    if(!Array.isArray(groups)||groups.length===0)throw new Error('グループが取得できませんでした');
 
     stopLoad();
     document.getElementById('loading').style.display='none';
     renderResult(groups);
 
   }catch(e){
-    // Retry up to 2 times
     if(retryCount<2){
       document.getElementById('loadTxt').textContent=`再試行中（${retryCount+1}/2）...`;
       await new Promise(r=>setTimeout(r,2000));
